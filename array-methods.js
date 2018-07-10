@@ -66,7 +66,7 @@ var datasetWithRoundedDime = bankBalances.map(currentObject => {
 
   let amount = currentObject.amount;
   let state = currentObject.state;
-  let roundedDime = parseFloat(parseFloat(amount).toFixed(1));
+  let roundedDime = roundAndAdd(amount, undefined, 1);
 
   return {
     'amount': amount,
@@ -106,8 +106,7 @@ statesArray.forEach(currentState => {
 });
 
 sumOfInterests = filteredArray.reduce((sum, currentAccount) => {
-  sum += parseFloat(currentAccount.amount) * 0.189;
-  return parseFloat(sum.toFixed(2));
+  return roundAndAdd(sum, (currentAccount.amount * 0.189));
 }, 0);
 
 /*
@@ -136,8 +135,7 @@ bankBalances.forEach(currentAccount => {
     stateSums[state] = 0.0;
   }
 
-  stateSums[state] += balance;
-  stateSums[state] = Math.round(stateSums[state] * 100) / 100;
+  stateSums[state] = roundAndAdd(stateSums[state], balance);
 
 });
 
@@ -181,8 +179,7 @@ filteredOtherArray.forEach(currentAccount => {
     otherStateSums[state] = 0.0;
   }
 
-  otherStateSums[state] += balance;
-  otherStateSums[state] = Math.round(otherStateSums[state] * 100) / 100;
+  otherStateSums[state] = roundAndAdd(otherStateSums[state], balance);
 
 });
 
@@ -190,10 +187,10 @@ sumOfHighInterests = Object.values(otherStateSums)
   .reduce((sum, currentStateTotal) => {
     let interest = parseFloat(currentStateTotal) * 0.189;
     if (interest > 50000) {
-      sum = parseFloat((sum + interest).toFixed(2));
+      sum = roundAndAdd(sum + interest);
     }
 
-      return sum;
+    return sum;
 
   }, 0);
 
@@ -214,8 +211,8 @@ bankBalances.forEach(currentAccount => {
     totalStateSums[state] = 0.0;
   }
 
-  totalStateSums[state] += parseFloat(amount);
-  totalStateSums[state] = parseFloat(parseFloat(totalStateSums[state]).toFixed(2));
+  totalStateSums[state] = roundAndAdd(totalStateSums[state], amount);
+
 });
 
 Object.entries(totalStateSums).forEach(stateAccount => {
@@ -232,7 +229,7 @@ var higherStateSums = 0;
 
 Object.entries(totalStateSums).forEach(stateAccount => {
   if (stateAccount[1] > 1000000) {
-    higherStateSums += parseFloat(stateAccount[1]);
+    higherStateSums = roundAndAdd(higherStateSums, stateAccount[1]);
   }
 });
 
@@ -275,6 +272,24 @@ var areStatesInHigherStateSum = statesArray.every(currentState => {
 var anyStatesInHigherStateSum = statesArray.some(currentState => {
   return totalStateSums[currentState] > 2550000;
 });
+
+function roundAndAdd(number1, number2, decimalPlace) {
+
+  if (!decimalPlace) {
+    decimalPlace = 2;
+  }
+
+  number1 = parseFloat(number1);
+
+  if (number2) {
+
+    number2 = parseFloat(number2);
+
+    return parseFloat((number1 + number2).toFixed(decimalPlace));
+  } else {
+    return parseFloat(number1.toFixed(decimalPlace));
+  }
+}
 
 module.exports = {
   hundredThousandairs: hundredThousandairs,
