@@ -1,12 +1,16 @@
-var dataset = require('./dataset.json');
+'use strict';
 
-let bankBalances = Object.values(dataset['bankBalances']);
+const dataset = require('./dataset.json');
+
+const bankBalances = dataset['bankBalances'];
+
 /*
   create an array with accounts from bankBalances that are
   greater than 100000
   assign the resulting new array to `hundredThousandairs`
 */
-var hundredThousandairs = bankBalances
+
+const hundredThousandairs = bankBalances
   .filter(currentObject => currentObject.amount > 100000);
 
 /*
@@ -26,17 +30,14 @@ var hundredThousandairs = bankBalances
     }
   assign the resulting new array to `datasetWithRoundedDollar`
 */
-var datasetWithRoundedDollar = bankBalances.map(currentObject => {
-
-  amount = currentObject.amount;
-  state = currentObject.state;
-  rounded = Math.round(amount);
+const datasetWithRoundedDollar = bankBalances.map(currentObject => {
 
   return currentObject = {
-    'amount': amount,
-    'state': state,
-    'rounded': rounded
+    'amount': currentObject.amount,
+    'state': currentObject.state,
+    'rounded': Math.round(currentObject.amount)
   };
+
 });
 
 /*
@@ -62,25 +63,22 @@ var datasetWithRoundedDollar = bankBalances.map(currentObject => {
     }
   assign the resulting new array to `roundedDime`
 */
-var datasetWithRoundedDime = bankBalances.map(currentObject => {
-
-  let amount = currentObject.amount;
-  let state = currentObject.state;
-  let roundedDime = roundAndAdd(amount, undefined, 1);
+const datasetWithRoundedDime = bankBalances.map(currentObject => {
 
   return {
-    'amount': amount,
-    'state': state,
-    'roundedDime': roundedDime
+    'amount': currentObject.amount,
+    'state': currentObject.state,
+    'roundedDime': roundAndAdd(currentObject.amount, undefined, 1)
   }
 });
 
 // set sumOfBankBalances to be the sum of all value held at `amount` for each bank object
 
-var sumOfBankBalances = parseFloat(bankBalances
+const sumOfBankBalances = parseFloat(bankBalances
   .reduce((sum, currentObject) => {
     return sum += parseFloat(currentObject.amount);
-  }, 0).toFixed(2));
+  }, 0).toFixed(2)
+);
 
 /*
   from each of the following states:
@@ -93,21 +91,30 @@ var sumOfBankBalances = parseFloat(bankBalances
   take each `amount` and add 18.9% interest to it rounded to the nearest cent
   and then sum it all up into one value saved to `sumOfInterests`
  */
+
 let statesArray = ['WI', 'IL', 'WY', 'OH', 'GA', 'DE'];
 var sumOfInterests = 0;
 let filteredArray = [];
 
-statesArray.forEach(currentState => {
-  filteredArray.push(...bankBalances
-    .filter(currentAccount => {
-      return currentAccount.state === currentState;
-    })
-  );
+filteredArray = bankBalances.filter(curr => {
+  return (statesArray.some(currState => {
+    return currState === curr.state;
+  }));
 });
 
 sumOfInterests = filteredArray.reduce((sum, currentAccount) => {
   return roundAndAdd(sum, (currentAccount.amount * 0.189));
 }, 0);
+
+
+// First method I used to solve the problem
+// statesArray.forEach(currentState => {
+//   filteredArray.push(...bankBalances
+//     .filter(currentAccount => {
+//       return currentAccount.state === currentState;
+//     })
+//   );
+// });
 
 /*
   aggregate the sum of bankBalance amounts
@@ -127,19 +134,28 @@ sumOfInterests = filteredArray.reduce((sum, currentAccount) => {
  */
 var stateSums = {};
 
-bankBalances.forEach(currentAccount => {
-  let balance = parseFloat(currentAccount.amount);
+stateSums = bankBalances.reduce((sum, currentAccount) => {
   let state = currentAccount.state;
 
-  if (!stateSums[state]) {
-    stateSums[state] = 0.0;
+  if (!sum[state]) {
+    sum[state] = 0.0;
   }
 
-  stateSums[state] = roundAndAdd(stateSums[state], balance);
+  sum[state] = roundAndAdd(sum[state], currentAccount.amount);
+  return sum;
+}, {});
 
-});
+// bankBalances.forEach(currentAccount => {
+//   let balance = parseFloat(currentAccount.amount);
+//   let state = currentAccount.state;
 
+//   if (!stateSums[state]) {
+//     stateSums[state] = 0.0;
+//   }
 
+//   stateSums[state] = roundAndAdd(stateSums[state], balance);
+
+// });
 
 /*
   for all states *NOT* in the following states:
@@ -160,28 +176,25 @@ bankBalances.forEach(currentAccount => {
  */
 
 var sumOfHighInterests = 0;
-let filteredOtherArray = bankBalances;
+let filteredOtherArray = [];
 
-
-statesArray.forEach(currentState => {
-  filteredOtherArray = filteredOtherArray.filter(currentAccount => {
-    return (currentAccount.state !== currentState);
-  });
+filteredOtherArray = bankBalances.filter(curr => {
+  return !(statesArray.some(currState => {
+    return currState === curr.state;
+  }));
 });
 
-var otherStateSums = {};
-
-filteredOtherArray.forEach(currentAccount => {
-  let balance = parseFloat(currentAccount.amount);
+const otherStateSums = filteredOtherArray.reduce((sum, currentAccount) => {
   let state = currentAccount.state;
 
-  if (!otherStateSums[state]) {
-    otherStateSums[state] = 0.0;
+  if (!sum[state]) {
+    sum[state] = 0.0;
   }
 
-  otherStateSums[state] = roundAndAdd(otherStateSums[state], balance);
+  sum[state] = roundAndAdd(sum[state], currentAccount.amount);
 
-});
+  return sum;
+},{ });
 
 sumOfHighInterests = Object.values(otherStateSums)
   .reduce((sum, currentStateTotal) => {
@@ -194,26 +207,31 @@ sumOfHighInterests = Object.values(otherStateSums)
 
   }, 0);
 
+//Original method with forEach
+// statesArray.forEach(currentState => {
+//   filteredOtherArray = filteredOtherArray.filter(currentAccount => {
+//     return (currentAccount.state !== currentState);
+//   });
+// });
+
 /*
   set `lowerSumStates` to be an array of two letter state
   abbreviations of each state where the sum of amounts
   in the state is less than 1,000,000
  */
 var lowerSumStates = [];
-let totalStateSums = {};
 
-bankBalances.forEach(currentAccount => {
-
+const totalStateSums = bankBalances.reduce((sum, currentAccount) => {
   let state = currentAccount.state;
-  let amount = parseFloat(currentAccount.amount).toFixed(2);
 
-  if (!totalStateSums[state]) {
-    totalStateSums[state] = 0.0;
+  if (!sum[state]) {
+    sum[state] = 0.0;
   }
 
-  totalStateSums[state] = roundAndAdd(totalStateSums[state], amount);
-
-});
+  sum[state] = roundAndAdd(sum[state], currentAccount.amount);
+  
+  return sum;
+},{ });
 
 Object.entries(totalStateSums).forEach(stateAccount => {
   if (stateAccount[1] < 1000000) {
@@ -225,13 +243,13 @@ Object.entries(totalStateSums).forEach(stateAccount => {
   aggregate the sum of each state into one hash table
   `higherStateSums` should be the sum of all states with totals greater than 1,000,000
  */
-var higherStateSums = 0;
 
-Object.entries(totalStateSums).forEach(stateAccount => {
+var higherStateSums = Object.entries(totalStateSums).reduce((sum,stateAccount) => {
   if (stateAccount[1] > 1000000) {
-    higherStateSums = roundAndAdd(higherStateSums, stateAccount[1]);
+    sum = roundAndAdd(sum, stateAccount[1]);
   }
-});
+  return sum;
+},0);
 
 /*
   from each of the following states:
