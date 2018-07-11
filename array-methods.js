@@ -194,7 +194,7 @@ const otherStateSums = filteredOtherArray.reduce((sum, currentAccount) => {
   sum[state] = roundAndAdd(sum[state], currentAccount.amount);
 
   return sum;
-},{ });
+}, {});
 
 sumOfHighInterests = Object.values(otherStateSums)
   .reduce((sum, currentStateTotal) => {
@@ -229,9 +229,9 @@ const totalStateSums = bankBalances.reduce((sum, currentAccount) => {
   }
 
   sum[state] = roundAndAdd(sum[state], currentAccount.amount);
-  
+
   return sum;
-},{ });
+}, {});
 
 Object.entries(totalStateSums).forEach(stateAccount => {
   if (stateAccount[1] < 1000000) {
@@ -244,12 +244,12 @@ Object.entries(totalStateSums).forEach(stateAccount => {
   `higherStateSums` should be the sum of all states with totals greater than 1,000,000
  */
 
-var higherStateSums = Object.entries(totalStateSums).reduce((sum,stateAccount) => {
+var higherStateSums = Object.entries(totalStateSums).reduce((sum, stateAccount) => {
   if (stateAccount[1] > 1000000) {
     sum = roundAndAdd(sum, stateAccount[1]);
   }
   return sum;
-},0);
+}, 0);
 
 /*
   from each of the following states:
